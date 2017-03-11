@@ -2,17 +2,18 @@ doctype html
 html
   head
     title=title
-    script(src='/static/jquery/dist/jquery.min.js')
-    script(src='/static/pdfjs-dist/build/pdf.min.js')
+    script(src='/bower/jquery/dist/jquery.min.js')
+    script(src='/bower/pdfjs-dist/build/pdf.min.js')
   body
     div(id='viewer')
 
 script.
 
+    var scale = 2;
     var canvasContainer = $('#viewer')[0];
 
     function renderPage(page, pn) {
-        var viewport = page.getViewport(1.5);
+        var viewport = page.getViewport(scale);
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext('2d');
         var renderContext = {
@@ -25,10 +26,15 @@ script.
         $(canvas).attr('page', page.pageIndex);
         canvasContainer.appendChild(canvas);
 
-        page.render(renderContext);
+        page.render(renderContext).then(function () {
+            return page.getTextContent();
+        }).then(function (textContent) {
+            console.log({page: page.pageIndex, text: textContent});
+        });
     }
 
-    PDFJS.workerSrc = '/static/pdfjs-dist/build/pdf.worker.min.js';
+    PDFJS.workerSrc = '/bower/pdfjs-dist/build/pdf.worker.min.js';
+    PDFJS.disableWorker = true;
     PDFJS.getDocument('/file/' + '#{file}').then(function (doc) {
         for (var pn = 1; pn <= doc.numPages; ++pn) {
             doc.getPage(pn).then(renderPage);

@@ -1,7 +1,7 @@
 var express = require('express');
 var app = express();
 
-app.use('/static', express.static('bower_components'));
+app.use('/bower', express.static('bower_components'));
 app.use('/file', express.static('pdfs'));
 
 app.set('view engine', 'pug');
