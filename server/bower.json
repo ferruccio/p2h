@@ -1,0 +1,21 @@
+{
+  "name": "server",
+  "description": "pdfjs based node server",
+  "main": "index.js",
+  "authors": [
+    "Ferruccio Barletta"
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "pdfjs-dist": "^1.7.361",
+    "jquery": "^3.1.1"
+  }
+}
