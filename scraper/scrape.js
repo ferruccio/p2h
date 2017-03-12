@@ -1,4 +1,6 @@
-var page = require('./webpage-diag.js').create({
+var webpage = require('./webpage-diag.js');
+
+var page = webpage.create({
     load: pageLoaded
 });
 
@@ -10,13 +12,19 @@ function pageLoaded(success) {
                     window.callPhantom({ action: 'finished' });
                 })
                 .on('pdf:pageloaded', function(event, pageIndex) {
-                    var el = document.getElementById('page-index-' + pageIndex);
-                    var style = el.getAttribute('style') || '';
+                    var page = document.getElementById('page-index-' + pageIndex);
+                    var style = page.getAttribute('style') || '';
                     var div = '<div class="page" style="' + style + '">\n';
+                    var pageImage = page.firstChild;
+                    var canvas = pageImage.firstChild;
+                    var imgURL = canvas.toDataURL('image/png', 0.5);
+                    var img = document.createElement('img');
+                    img.setAttribute('src', imgURL);
+                    pageImage.replaceChild(img, canvas);
                     window.callPhantom({
                         action: 'page',
                         pageIndex: pageIndex,
-                        html: div + el.innerHTML + '</div>\n'
+                        html: div + page.innerHTML + '</div>\n'
                     });
                 })
 
@@ -24,8 +32,9 @@ function pageLoaded(success) {
     }
 }
 
+var fs = require('fs');
+
 function writePage(pageIndex, html) {
-    var fs = require('fs');
     var css = '<link href="viewer.css" rel="stylesheet" />';
     var head = '<head>' + css + '</head>\n';
     var content = '<!DOCTYPE html>\n<html>\n' + head + '<body>\n' + html + '\n</body>\n</html>\n';
