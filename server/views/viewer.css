@@ -4,33 +4,28 @@ body {
 }
 
 .page {
-    border-bottom: 1px solid red;
     margin: 0;
     padding: 0;
     position: relative;
 }
 
-.page-image, .page-text {
-  width: 100%;
-  height: 100%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.page-text {
-  z-index: 10;
-  background-color: transparent;
-  color: transparent;
-  mix-blend-mode: multiply;
-}
-
-text {
-    color: yellow;
-    background-color: yellow;
-    padding: 0;
+.page-image {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
     margin: 0;
+    padding: 0;
+    opacity: 0.5;
 }
 
+.text {
+    position: absolute;
+    cursor: text;
+    white-space: pre;
+    transform-origin: left bottom;
+    margin: 0;
+    padding: 0;
+    z-index: 10;
+}
