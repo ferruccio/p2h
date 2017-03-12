@@ -16,9 +16,6 @@ script.
     var totalPages = 0;
     var pagesRendered = 0;
 
-    document.notifyRenderDoc = function(npages) { console.log('renderDoc: npages=' + npages); };
-    document.notifyRenderPage = function(page) { console.log('renderPage: page=' + page); };
-
     function getFontSize(style, tx) {
         var fontSize = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
 
@@ -78,8 +75,11 @@ script.
 
                 $page.append($(item).addClass('text'));
             });
+            $('html').trigger('pdf:pageloaded', [page.pageIndex]);
             pagesRendered += 1;
-            document.notifyRenderPage(pagesRendered);
+            if (pagesRendered >= totalPages) {
+                $('html').trigger('pdf:docloaded');
+            }
         });
     }
 
@@ -94,7 +94,6 @@ script.
         }
         totalPages = doc.numPages;
         pagesRendered = 0;
-        document.notifyRenderDoc(totalPages);
         for (var pn = 1; pn <= doc.numPages; ++pn) {
             doc.getPage(pn).then(renderPage);
         }

@@ -8,16 +8,17 @@ app.use('/css', express.static('views'));
 app.set('view engine', 'pug');
 
 app.get('/', function(req, res) {
-   res.send('use /pdf/<filename>');
+    res.send('use /pdf/<filename>');
 });
 
 app.get('/pdf/:filename', function(req, res) {
-   res.render('index', { title: 'PDF file', file: req.params.filename });
+    console.log('GET: ' + req.params.filename);
+    res.render('index', { title: 'PDF file', file: req.params.filename });
 });
 
 var server = app.listen(8080, function () {
-   var host = server.address().address
-   var port = server.address().port
+    var host = server.address().address
+    var port = server.address().port
 
-   console.log("Example app listening at http://%s:%s", host, port)
+    console.log("Example app listening at http://%s:%s", host, port)
 });
