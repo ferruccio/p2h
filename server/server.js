@@ -3,6 +3,7 @@ var app = express();
 
 app.use('/bower', express.static('bower_components'));
 app.use('/file', express.static('pdfs'));
+app.use('/css', express.static('views'));
 
 app.set('view engine', 'pug');
 

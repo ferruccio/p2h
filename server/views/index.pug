@@ -2,6 +2,7 @@ doctype html
 html
   head
     title=title
+    link(href='/css/viewer.css', rel='stylesheet', type='text/css')
     script(src='/bower/jquery/dist/jquery.min.js')
     script(src='/bower/pdfjs-dist/build/pdf.min.js')
   body
@@ -9,7 +10,7 @@ html
 
 script.
 
-    var scale = 2;
+    var scale = 1.5;
     var canvasContainer = $('#viewer')[0];
 
     function renderPage(page, pn) {
@@ -23,19 +24,29 @@ script.
 
         canvas.height = viewport.height;
         canvas.width = viewport.width;
-        $(canvas).attr('page', page.pageIndex);
-        canvasContainer.appendChild(canvas);
+        var $page = $('#page-index-' + page.pageIndex);
+        $page.find('.page-image').append($(canvas));
+        //$(canvas).attr('page', page.pageIndex);
+        //canvasContainer.appendChild(canvas);
 
         page.render(renderContext).then(function () {
             return page.getTextContent();
         }).then(function (textContent) {
-            console.log({page: page.pageIndex, text: textContent});
+            $page.css('width', viewport.width+'px').css('height', viewport.height+'px');
+            $page.find('.page-text').html('<text>XXXXXXXX</text>');
+            //console.log({page: page.pageIndex, text: textContent});
         });
     }
 
     PDFJS.workerSrc = '/bower/pdfjs-dist/build/pdf.worker.min.js';
     PDFJS.disableWorker = true;
     PDFJS.getDocument('/file/' + '#{file}').then(function (doc) {
+        for (var pi = 0; pi < doc.numPages; ++pi) {
+            $('#viewer').append(
+                $("<div class='page' id='page-index-" + pi +
+                    "'><div class='page-image'/><div class='page-text'/></div>")
+            );
+        }
         for (var pn = 1; pn <= doc.numPages; ++pn) {
             doc.getPage(pn).then(renderPage);
         }
