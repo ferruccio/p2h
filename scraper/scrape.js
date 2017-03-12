@@ -1,10 +1,11 @@
 var page = require('webpage').create();
 var fs = require('fs');
+var system = require('system');
 
-page.onLoadFinished = function(status) {
-    console.log("Status: " + status);
+function finishLoad(status) {
     if (status === "success") {
         page.evaluate(function() {
+            var $ = $ || function() { window.callPhantom({ action: 'panic' }); };
             $('html')
                 .on('pdf:docloaded', function(event) {
                     window.callPhantom({ action: 'finished' });
@@ -39,7 +40,7 @@ page.onCallback = function(cb) {
             break;
 
         default:
-            console.log('page.onCallback: unknown action received');
+            console.log('page.onCallback: unknown action received (' + cb.action + ')');
             phantom.exit();
     }
 };
@@ -52,25 +53,54 @@ page.onConsoleMessage = function(msg, lineNum, sourceId) {
     }
 };
 
+page.onResourceRequested = function (request) {
+    system.stderr.writeLine('= onResourceRequested()');
+    system.stderr.writeLine('  request: ' + JSON.stringify(request, undefined, 4));
+};
+ 
+page.onResourceReceived = function(response) {
+    system.stderr.writeLine('= onResourceReceived()' );
+    system.stderr.writeLine('  id: ' + response.id + ', stage: "' + response.stage + '", response: ' + JSON.stringify(response));
+};
+ 
+page.onLoadStarted = function() {
+    system.stderr.writeLine('= onLoadStarted()');
+    var currentUrl = page.evaluate(function() {
+        return window.location.href;
+    });
+    system.stderr.writeLine('  leaving url: ' + currentUrl);
+};
+ 
+page.onLoadFinished = function(status) {
+    system.stderr.writeLine('= onLoadFinished()');
+    system.stderr.writeLine('  status: ' + status);
+    finishLoad(status);
+};
+ 
+page.onNavigationRequested = function(url, type, willNavigate, main) {
+    system.stderr.writeLine('= onNavigationRequested');
+    system.stderr.writeLine('  destination_url: ' + url);
+    system.stderr.writeLine('  type (cause): ' + type);
+    system.stderr.writeLine('  will navigate: ' + willNavigate);
+    system.stderr.writeLine('  from page\'s main frame: ' + main);
+};
+ 
+page.onResourceError = function(resourceError) {
+    system.stderr.writeLine('= onResourceError()');
+    system.stderr.writeLine('  - unable to load url: "' + resourceError.url + '"');
+    system.stderr.writeLine('  - error code: ' + resourceError.errorCode + ', description: ' + resourceError.errorString );
+};
+ 
 page.onError = function(msg, trace) {
-    var msgStack = ['ERROR: ' + msg];
-
-    if (trace && trace.length) {
-        msgStack.push('TRACE:');
+    system.stderr.writeLine('= onError()');
+    var msgStack = ['  ERROR: ' + msg];
+    if (trace) {
+        msgStack.push('  TRACE:');
         trace.forEach(function(t) {
-            msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+            msgStack.push('    -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function + '")' : ''));
         });
     }
-    console.error(msgStack.join('\n'));
-};
-
-page.onResourceError = function(resourceError) {
-    console.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
-    console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
-};
-
-page.onResourceTimeout = function(request) {
-    console.log('Response (#' + request.id + '): ' + JSON.stringify(request));
+    system.stderr.writeLine(msgStack.join('\n'));
 };
 
 page.open('http://localhost:8080/pdf/tracemonkey.pdf');
