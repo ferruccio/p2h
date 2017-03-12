@@ -1,4 +1,5 @@
 var page = require('webpage').create();
+var fs = require('fs');
 
 page.onLoadFinished = function(status) {
     console.log("Status: " + status);
@@ -20,6 +21,13 @@ page.onLoadFinished = function(status) {
     }
 }
 
+function writePage(pageIndex, html) {
+    var css = '<link href="viewer.css" rel="stylesheet" />';
+    var head = '<head>' + css + '</head>\n';
+    var content = '<doctype html>\n<html>\n' + head + '<body>\n' + html + '\n</body>\n</html>\n';
+    fs.write('data/page-' + (pageIndex + 1) + '.html', content, 'w');
+}
+
 page.onCallback = function(cb) {
     switch (cb.action) {
         case 'finished':
@@ -27,6 +35,7 @@ page.onCallback = function(cb) {
 
         case 'page':
             console.log('page: ' + cb.pageIndex);
+            writePage(cb.pageIndex, cb.html);
             break;
 
         default:
