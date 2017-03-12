@@ -13,13 +13,32 @@ script.
     var scale = 1.5;
     var canvasContainer = $('#viewer')[0];
 
+    var totalPages = 0;
+    var pagesRendered = 0;
+
+    document.notifyRenderDoc = function(npages) { console.log('renderDoc: npages=' + npages); };
+    document.notifyRenderPage = function(page) { console.log('renderPage: page=' + page); };
+
+    function getFontSize(style, tx) {
+        var fontSize = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
+
+        if (style.ascent) {
+            tx[5] -= fontSize * style.ascent;
+        } else if (style.descent) {
+            tx[5] -= fontSize * (1 + style.descent);
+        } else {
+            tx[5] -= fontSize / 2;
+        }
+        return fontSize;
+    }
+
     function renderPage(page, pn) {
         var viewport = page.getViewport(scale);
         var canvas = document.createElement('canvas');
         var ctx = canvas.getContext('2d');
         var renderContext = {
-          canvasContext: ctx,
-          viewport: viewport
+            canvasContext: ctx,
+            viewport: viewport
         };
 
         canvas.height = viewport.height;
@@ -38,17 +57,7 @@ script.
                 );
 
                 var style = textContent.styles[textItem.fontName];
-
-                // adjust for font ascent/descent
-                var fontSize = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
-
-                if (style.ascent) {
-                    tx[5] -= fontSize * style.ascent;
-                } else if (style.descent) {
-                    tx[5] -= fontSize * (1 + style.descent);
-                } else {
-                    tx[5] -= fontSize / 2;
-                }
+                var fontSize = getFontSize(style, tx);
 
                 // adjust for rendered width
                 if (textItem.width > 0) {
@@ -62,7 +71,6 @@ script.
                 var item = document.createElement('div');
                 item.textContent = textItem.str;
                 item.style.fontFamily = style.fontFamily;
-                //item.style.transform = 'matrix(' + tx.join(',') + ')';
                 item.style.fontSize = fontSize + 'px';
                 item.style.transform = 'scaleX(' + tx[0] + ')';
                 item.style.left = tx[4] + 'px';
@@ -70,6 +78,8 @@ script.
 
                 $page.append($(item).addClass('text'));
             });
+            pagesRendered += 1;
+            document.notifyRenderPage(pagesRendered);
         });
     }
 
@@ -80,10 +90,11 @@ script.
         for (var pi = 0; pi < doc.numPages; ++pi) {
             $('#viewer').append(
                 $("<div class='page' id='page-index-" + pi + "'>" +
-                    "<div class='page-image'/>" /*+
-                    "<div class='page-text'>" +
-                        "<div class='page-text-spans'></div></div>"*/));
+                    "<div class='page-image'/>"));
         }
+        totalPages = doc.numPages;
+        pagesRendered = 0;
+        document.notifyRenderDoc(totalPages);
         for (var pn = 1; pn <= doc.numPages; ++pn) {
             doc.getPage(pn).then(renderPage);
         }
