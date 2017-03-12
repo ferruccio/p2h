@@ -10,10 +10,13 @@ function pageLoaded(success) {
                     window.callPhantom({ action: 'finished' });
                 })
                 .on('pdf:pageloaded', function(event, pageIndex) {
+                    var el = document.getElementById('page-index-' + pageIndex);
+                    var style = el.getAttribute('style') || '';
+                    var div = '<div class="page" style="' + style + '">\n';
                     window.callPhantom({
                         action: 'page',
                         pageIndex: pageIndex,
-                        html: $('#page-index-' + pageIndex).html().replace('\\','')
+                        html: div + el.innerHTML + '</div>\n'
                     });
                 })
 
@@ -25,7 +28,7 @@ function writePage(pageIndex, html) {
     var fs = require('fs');
     var css = '<link href="viewer.css" rel="stylesheet" />';
     var head = '<head>' + css + '</head>\n';
-    var content = '<doctype html>\n<html>\n' + head + '<body>\n' + html + '\n</body>\n</html>\n';
+    var content = '<!DOCTYPE html>\n<html>\n' + head + '<body>\n' + html + '\n</body>\n</html>\n';
     fs.write('data/page-' + (pageIndex + 1) + '.html', content, 'w');
 }
 
