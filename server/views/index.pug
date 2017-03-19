@@ -17,7 +17,7 @@ script.
 
     function renderPage(page) {
         var viewport = page.getViewport(scale);
-        var $canvas = $("<canvas></canvas>");
+        var $canvas = $("<canvas />");
 
         var canvas = $canvas.get(0);
         var context = canvas.getContext("2d");
@@ -26,22 +26,22 @@ script.
 
         var $page = $('#page-index-' + page.pageIndex);
         $page.css({ height: viewport.height + "px", width: viewport.width + "px" });
-        $page.append($canvas);
+        $('#page-image-' + page.pageIndex).append($canvas);
 
         var canvasOffset = $canvas.offset();
-        var $textLayerDiv = $("<div />")
+        var $text = $("#page-text-" + page.pageIndex);
+        $text
             .addClass("textLayer")
             .css({ height: viewport.height + "px", width: viewport.width + "px" })
             .offset({ top: canvasOffset.top, left: canvasOffset.left });
 
-        $page.append($textLayerDiv);
-
         page.getTextContent().then(function (textContent) {
             PDFJS.renderTextLayer({
                 textContent: textContent,
-                container: $textLayerDiv.get(0),
+                container: $text.get(0),
                 viewport: viewport,
-                textDivs: []
+                textDivs: [],
+                enhanceTextSelection: true
             });
 
             var renderContext = {
@@ -63,7 +63,12 @@ script.
     PDFJS.disableWorker = true;
     PDFJS.getDocument('/file/' + '#{file}').then(function (doc) {
         for (var pi = 0; pi < doc.numPages; ++pi) {
-            $('#viewer').append($("<div class='page' id='page-index-" + pi + "'>"));
+            $('#viewer').append($(
+                "<div class='page' id='page-index-" + pi + "'>" +
+                    "<div id='page-text-" + pi + "' class='page-text' />" +
+                    "<div id='page-image-" + pi + "' class='page-image' />" +
+                "</div>"
+            ));
         }
         totalPages = doc.numPages;
         pagesRendered = 0;
