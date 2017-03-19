@@ -15,7 +15,7 @@ function pageLoaded(success) {
                     var page = document.getElementById('page-index-' + pageIndex);
                     var style = page.getAttribute('style') || '';
                     var div = '<div class="page" style="' + style + '">\n';
-                    var pageImage = page.firstChild;
+                    var pageImage = document.getElementById('page-image-' + pageIndex);
                     var canvas = pageImage.firstChild;
                     var imgURL = canvas.toDataURL('image/png', 0.5);
                     var img = document.createElement('img');
@@ -37,7 +37,7 @@ var fs = require('fs');
 function writePage(pageIndex, html) {
     var css = '<link href="viewer.css" rel="stylesheet" />';
     var head = '<head>' + css + '</head>\n';
-    var content = '<!DOCTYPE html>\n<html>\n' + head + '<body>\n' + html + '\n</body>\n</html>\n';
+    var content = '<!DOCTYPE html>\n<html>\n' + head + '<body>\n<div id="viewer">' + html + '\n</div>\n</body>\n</html>\n';
     fs.write('data/page-' + (pageIndex + 1) + '.html', content, 'w');
 }
 
