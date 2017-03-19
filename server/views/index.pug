@@ -2,7 +2,7 @@ doctype html
 html
   head
     title=title
-    link(href='/css/viewer.css', rel='stylesheet', type='text/css')
+    link(href='/views/viewer.css', rel='stylesheet', type='text/css')
     script(src='/bower/jquery/dist/jquery.min.js')
     script(src='/bower/pdfjs-dist/build/pdf.min.js')
   body
@@ -11,86 +11,59 @@ html
 script.
 
     var scale = 1.5;
-    var canvasContainer = $('#viewer')[0];
 
     var totalPages = 0;
     var pagesRendered = 0;
 
-    function getFontSize(style, tx) {
-        var fontSize = Math.sqrt((tx[2] * tx[2]) + (tx[3] * tx[3]));
-
-        if (style.ascent) {
-            tx[5] -= fontSize * style.ascent;
-        } else if (style.descent) {
-            tx[5] -= fontSize * (1 + style.descent);
-        } else {
-            tx[5] -= fontSize / 2;
-        }
-        return fontSize;
-    }
-
-    function renderPage(page, pn) {
+    function renderPage(page) {
         var viewport = page.getViewport(scale);
-        var canvas = document.createElement('canvas');
-        var ctx = canvas.getContext('2d');
-        var renderContext = {
-            canvasContext: ctx,
-            viewport: viewport
-        };
+        var $canvas = $("<canvas></canvas>");
 
+        var canvas = $canvas.get(0);
+        var context = canvas.getContext("2d");
         canvas.height = viewport.height;
         canvas.width = viewport.width;
+
         var $page = $('#page-index-' + page.pageIndex);
-        $page.css({height: viewport.height+"px", width: viewport.width+"px"});
-        $page.find('.page-image').append($(canvas));
+        $page.css({ height: viewport.height + "px", width: viewport.width + "px" });
+        $page.append($canvas);
 
-        page.render(renderContext).then(function () {
-            return page.getTextContent({ normalizeWhitespace: true });
-        }).then(function (textContent) {
-            textContent.items.forEach(function (textItem) {
-                var tx = PDFJS.Util.transform(
-                    PDFJS.Util.transform(viewport.transform, textItem.transform),
-                    [1, 0, 0, -1, 0, 0]
-                );
+        var canvasOffset = $canvas.offset();
+        var $textLayerDiv = $("<div />")
+            .addClass("textLayer")
+            .css({ height: viewport.height + "px", width: viewport.width + "px" })
+            .offset({ top: canvasOffset.top, left: canvasOffset.left });
 
-                var style = textContent.styles[textItem.fontName];
-                var fontSize = getFontSize(style, tx);
+        $page.append($textLayerDiv);
 
-                // adjust for rendered width
-                if (textItem.width > 0) {
-                    ctx.font = tx[0] + 'px ' + style.fontFamily;
-                    var width = ctx.measureText(textItem.str).width;
-                    if (width > 0) {
-                        tx[0] = (textItem.width * viewport.scale) / width;
-                    }
-                }
-
-                var item = document.createElement('div');
-                item.textContent = textItem.str;
-                item.style.fontFamily = style.fontFamily;
-                item.style.fontSize = fontSize + 'px';
-                item.style.transform = 'scaleX(' + tx[0] + ')';
-                item.style.left = tx[4] + 'px';
-                item.style.top = tx[5] + 'px';
-
-                $page.append($(item).addClass('text'));
+        page.getTextContent().then(function (textContent) {
+            PDFJS.renderTextLayer({
+                textContent: textContent,
+                container: $textLayerDiv.get(0),
+                viewport: viewport,
+                textDivs: []
             });
-            $('html').trigger('pdf:pageloaded', [page.pageIndex]);
-            pagesRendered += 1;
-            if (pagesRendered >= totalPages) {
-                $('html').trigger('pdf:docloaded');
-            }
+
+            var renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            page.render(renderContext).then(function() {
+                $('html').trigger('pdf:pageloaded', [page.pageIndex]);
+                pagesRendered += 1;
+                if (pagesRendered >= totalPages) {
+                    $('html').trigger('pdf:docloaded');
+                }
+            });
         });
     }
 
+
     PDFJS.workerSrc = '/bower/pdfjs-dist/build/pdf.worker.min.js';
     PDFJS.disableWorker = true;
-    PDFJS.disableRange = true
     PDFJS.getDocument('/file/' + '#{file}').then(function (doc) {
         for (var pi = 0; pi < doc.numPages; ++pi) {
-            $('#viewer').append(
-                $("<div class='page' id='page-index-" + pi + "'>" +
-                    "<div class='page-image'/>"));
+            $('#viewer').append($("<div class='page' id='page-index-" + pi + "'>"));
         }
         totalPages = doc.numPages;
         pagesRendered = 0;
