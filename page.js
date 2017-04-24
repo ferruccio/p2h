@@ -59,7 +59,6 @@ function replacePageImage(pageIndex) {
 let src = simpleQueryString.parse(window.location.search).pdf;
 
 PDFJS.workerSrc = 'bower_components/pdfjs-dist/build/pdf.worker.min.js';
-PDFJS.disableWorker = true;
 PDFJS.getDocument(src).then(function (doc) {
     for (var pi = 0; pi < doc.numPages; ++pi) {
         $('#viewer').append($(

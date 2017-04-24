@@ -2,7 +2,7 @@ const fs = require('fs-jetpack');
 const Nightmare = require('nightmare');
 
 let nightmare = Nightmare({
-    show: true,
+    show: false,
     openDevTools: false,
     waitTimeout: 10000
 });
