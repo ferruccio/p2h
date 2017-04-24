@@ -1,0 +1,21 @@
+{
+  "name": "p2h",
+  "description": "Experimental code to convert PDF files to HTML",
+  "main": "index.js",
+  "authors": [
+    "ferruccio.barletta@gmail.com"
+  ],
+  "license": "ISC",
+  "homepage": "https://github.com/ferruccio/p2h",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.2.1",
+    "pdfjs-dist": "^1.8.252"
+  }
+}

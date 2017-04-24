@@ -1,0 +1,16 @@
+{
+  "name": "p2h",
+  "version": "1.0.0",
+  "description": "Experimental code to convert PDF files to HTML",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "ferruccio.barletta@gmail.com",
+  "license": "ISC",
+  "dependencies": {
+    "bower": "^1.8.0",
+    "fs-jetpack": "^0.13.3",
+    "nightmare": "^2.10.0"
+  }
+}
