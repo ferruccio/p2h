@@ -7,9 +7,11 @@ let nightmare = Nightmare({
     waitTimeout: 100000
 });
 let source = fs.path(fs.cwd(), 'page.html');
+let pdf = fs.path(fs.cwd(), 'tracemonkey.pdf');
 
 nightmare
-    .goto('file://' + source)
+    .on('console', (type, msg) => console.log(type + '> ' + msg))
+    .goto('file://' + source + '?pdf=' + encodeURIComponent('file://' + pdf))
     .wait('#done')
     .evaluate(() => {
         let pages = [];

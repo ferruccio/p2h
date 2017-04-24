@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "jquery": "^3.2.1",
-    "pdfjs-dist": "^1.8.252"
+    "pdfjs-dist": "^1.8.252",
+    "simple-query-string": "^1.3.0"
   }
 }

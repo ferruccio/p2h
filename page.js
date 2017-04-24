@@ -39,10 +39,8 @@ function renderPage(page) {
         };
         page.render(renderContext).then(function() {
             replacePageImage(page.pageIndex);
-//            $('html').trigger('pdf:pageloaded', [page.pageIndex]);
             pagesRendered += 1;
             if (pagesRendered >= totalPages) {
-//                $('html').trigger('pdf:docloaded');
                 $('body').append('<div id="done" />');
             }
         });
@@ -58,11 +56,11 @@ function replacePageImage(pageIndex) {
     pageImage.replaceChild(img, canvas);
 }
 
-let SRC = 'file:///home/fgb/scratch/nightmare-test/tracemonkey.pdf';
+let src = simpleQueryString.parse(window.location.search).pdf;
 
 PDFJS.workerSrc = 'bower_components/pdfjs-dist/build/pdf.worker.min.js';
 PDFJS.disableWorker = true;
-PDFJS.getDocument(SRC).then(function (doc) {
+PDFJS.getDocument(src).then(function (doc) {
     for (var pi = 0; pi < doc.numPages; ++pi) {
         $('#viewer').append($(
             "<div class='page' id='page-index-" + pi + "'>" +
