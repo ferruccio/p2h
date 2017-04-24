@@ -3,8 +3,8 @@ const Nightmare = require('nightmare');
 
 let nightmare = Nightmare({
     show: true,
-    openDevTools: true,
-    waitTimeout: 100000
+    openDevTools: false,
+    waitTimeout: 10000
 });
 let source = fs.path(fs.cwd(), 'page.html');
 let pdf = fs.path(fs.cwd(), 'tracemonkey.pdf');
@@ -22,7 +22,11 @@ nightmare
     })
     .end()
     .then(pages => {
-        for (let pi = 0; pi < pages.length; ++pi)
-            console.log('pi: ' + pi + ' ' + pages[pi].substr(0, 70));
+        let template = fs.read('page-template.html');
+        for (let pi = 0; pi < pages.length; ++pi) {
+            let fn = '/tmp/tracemonkey-' + (pi+1) + '.html';
+            fs.write(fn, template.replace('{{page}}', pages[pi]));
+            console.log(fn);
+        }
     })
     .catch(error => console.error(error));

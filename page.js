@@ -1,4 +1,4 @@
-const scale = 1;
+const scale = 1.5;
 const quality = 0.5;
 
 var totalPages = 0;
