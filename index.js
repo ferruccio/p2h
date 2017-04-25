@@ -13,6 +13,7 @@ let nightmare = Nightmare({
 let source = fs.path(fs.cwd(), 'page.html');
 
 function p2h(pdf) {
+    console.log('processing: ' + source);
     nightmare
         .on('console', (type, msg) => console.log(type + '> ' + msg))
         .goto('file://' + source + '?pdf=' + encodeURIComponent('file://' + pdf))
@@ -29,7 +30,7 @@ function p2h(pdf) {
             let zip = JSZip();
             let template = fs.read('page-template.html');
             for (let pi = 0; pi < pages.length; ++pi) {
-                zip.file('page-' + (pi+1) + '.html', template.replace('{{page}}', pages[pi]));
+                zip.file((pi+1) + '.html', template.replace('{{page}}', pages[pi]));
                 console.log('page: ' + (pi + 1));
             }
             zip .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
@@ -46,7 +47,6 @@ program
     .arguments('<source>')
     .action(source => {
         source = path.resolve(path.normalize(source));
-        console.log('processing: ' + source);
         p2h(source);
     });
 
