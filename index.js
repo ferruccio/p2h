@@ -8,12 +8,12 @@ const program = require('commander');
 let nightmare = Nightmare({
     show: false,
     openDevTools: false,
-    waitTimeout: 10000
+    waitTimeout: 5 * 60 * 1000
 });
 let source = fs.path(fs.cwd(), 'page.html');
 
 function p2h(pdf) {
-    console.log('processing: ' + source);
+    console.log('processing: ' + pdf);
     nightmare
         .on('console', (type, msg) => console.log(type + '> ' + msg))
         .goto('file://' + source + '?pdf=' + encodeURIComponent('file://' + pdf))
@@ -27,6 +27,7 @@ function p2h(pdf) {
         })
         .end()
         .then(pages => {
+            console.log('generating ' + pdf + '.zip');
             let zip = JSZip();
             let template = fs.read('page-template.html');
             for (let pi = 0; pi < pages.length; ++pi) {
