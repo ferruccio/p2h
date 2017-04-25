@@ -1,5 +1,6 @@
 const fs = require('fs-jetpack');
 const Nightmare = require('nightmare');
+const JSZip = require('jszip');
 
 let nightmare = Nightmare({
     show: false,
@@ -22,11 +23,16 @@ nightmare
     })
     .end()
     .then(pages => {
+        let zip = JSZip();
         let template = fs.read('page-template.html');
         for (let pi = 0; pi < pages.length; ++pi) {
-            let fn = '/tmp/tracemonkey-' + (pi+1) + '.html';
-            fs.write(fn, template.replace('{{page}}', pages[pi]));
-            console.log(fn);
+            zip.file('page-' + (pi+1) + '.html', template.replace('{{page}}', pages[pi]));
+            console.log('page: ' + (pi + 1));
         }
+        zip .generateNodeStream({ type: 'nodebuffer', streamFiles: true })
+            .pipe(fs.createWriteStream(pdf + '.zip'))
+            .on('finish', function () {
+                console.log("zip finished.");
+            });
     })
     .catch(error => console.error(error));
